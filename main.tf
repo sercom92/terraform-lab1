@@ -16,10 +16,30 @@ resource "docker_image" "nginx" {
 
 # Crear un contenedor a partir de la imagen
 resource "docker_container" "web" {
-  name  = "web_server"
+  name  = var.web_container_name
   image = docker_image.nginx.name
   ports {
     internal = 80
-    external = 8080
+    external = var.web_external_port
+  }  
+}
+
+# Imagen de Redis
+resource "docker_image" "redis" {
+  name = "redis:latest"
+}
+
+# Contenedor Redis
+resource "docker_container" "redis" {
+  name  = var.redis_container_name
+  image = docker_image.redis.name
+
+  ports {
+    internal = 6379
+    external = var.redis_external_port
   }
+
+  depends_on = [
+    docker_container.web
+  ]
 }
